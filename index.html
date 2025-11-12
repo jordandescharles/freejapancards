@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FREE JAPAN Cards - Apprendre Hiragana et Katakana</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="header-content">
+                <div class="header-text">
+                    <h1>FREE JAPAN CARDS</h1>
+                    <p class="subtitle">Pratiquez vos connaissances en Hiragana et Katakana</p>
+                </div>
+                <button id="header-back-menu" class="btn btn-secondary header-back-btn hidden">← Retour au menu</button>
+            </div>
+        </header>
+
+        <!-- Menu de sélection -->
+        <div id="menu" class="menu-section">
+            <div class="menu-grid">
+                <div class="menu-card" data-mode="hiragana-chars">
+                    <div class="card-icon">ひ</div>
+                    <h2>Hiragana Characters</h2>
+                    <p>Pratiquez vos connaissances des caractères Hiragana</p>
+                </div>
+                <div class="menu-card" data-mode="hiragana-words">
+                    <div class="card-icon">ひ</div>
+                    <h2>Hiragana Words</h2>
+                    <p>Pratiquez vos connaissances des mots Hiragana</p>
+                </div>
+                <div class="menu-card" data-mode="katakana-chars">
+                    <div class="card-icon">カ</div>
+                    <h2>Katakana Characters</h2>
+                    <p>Pratiquez vos connaissances des caractères Katakana</p>
+                </div>
+                <div class="menu-card" data-mode="katakana-words">
+                    <div class="card-icon">カ</div>
+                    <h2>Katakana Words</h2>
+                    <p>Pratiquez vos connaissances des mots Katakana</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sélection de groupes (pour les caractères) -->
+        <div id="group-selection" class="group-selection hidden">
+            <h2>Sélectionnez les caractères à pratiquer</h2>
+            
+            <!-- Sélection par famille -->
+            <div class="selection-section">
+                <h3>Sélection par famille</h3>
+                <div id="group-checkboxes" class="group-checkboxes"></div>
+                <div class="button-group-small">
+                    <button id="select-all-groups" class="btn btn-secondary">Tout sélectionner</button>
+                    <button id="deselect-all-groups" class="btn btn-secondary">Tout désélectionner</button>
+                </div>
+            </div>
+            
+            <!-- Sélection individuelle -->
+            <div class="selection-section">
+                <h3>Sélection individuelle</h3>
+                <div id="character-checkboxes" class="character-checkboxes"></div>
+                <div class="button-group-small">
+                    <button id="select-all-characters" class="btn btn-secondary">Tout sélectionner</button>
+                    <button id="deselect-all-characters" class="btn btn-secondary">Tout désélectionner</button>
+                </div>
+            </div>
+            
+            <div class="button-group">
+                <button id="start-test" class="btn btn-primary">Commencer le test</button>
+                <button id="back-to-menu" class="btn btn-secondary">Retour au menu</button>
+            </div>
+        </div>
+
+        <!-- Sélection de niveau (pour les mots) -->
+        <div id="level-selection" class="level-selection hidden">
+            <h2>Sélectionnez le niveau</h2>
+            <div id="level-buttons" class="level-buttons"></div>
+            <button id="back-to-menu-words" class="btn btn-secondary">Retour au menu</button>
+        </div>
+
+        <!-- Zone de test -->
+        <div id="test-area" class="test-area hidden">
+            <div class="test-header">
+                <div class="progress-bar">
+                    <div id="progress" class="progress-fill"></div>
+                </div>
+                <div class="stats">
+                    <span>Score: <strong id="score">0</strong></span>
+                    <span>Total: <strong id="total">0</strong></span>
+                </div>
+            </div>
+
+            <div class="flashcard-container">
+                <div class="flashcard" id="flashcard">
+                    <div class="card-front">
+                        <div class="character-display" id="character-display"></div>
+                        <div id="translation-display" class="translation-display hidden"></div>
+                        <p class="instruction">Tapez le Romaji équivalent</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="input-section">
+                <input type="text" id="answer-input" class="answer-input" placeholder="Tapez votre réponse..." autocomplete="off" autofocus>
+                <button id="check-answer" class="btn btn-primary">Vérifier</button>
+            </div>
+
+            <div id="feedback" class="feedback hidden"></div>
+
+            <div class="test-controls">
+                <button id="next-card" class="btn btn-primary hidden">Suivant</button>
+                <button id="finish-test" class="btn btn-secondary hidden">Terminer</button>
+                <button id="restart-test" class="btn btn-secondary">Recommencer</button>
+            </div>
+        </div>
+
+        <!-- Résultats finaux -->
+        <div id="results" class="results hidden">
+            <h2>Résultats</h2>
+            <div class="results-stats">
+                <div class="stat-card">
+                    <div class="stat-value" id="final-score">0</div>
+                    <div class="stat-label">Score</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="final-total">0</div>
+                    <div class="stat-label">Total</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="final-percentage">0%</div>
+                    <div class="stat-label">Pourcentage</div>
+                </div>
+            </div>
+            <div class="button-group">
+                <button id="restart-from-results" class="btn btn-primary">Recommencer</button>
+                <button id="back-to-menu-results" class="btn btn-secondary">Retour au menu</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="data.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
+
