@@ -810,7 +810,128 @@ input:indeterminate + .slider:before {
     .input-section {
         flex-direction: column;
     }
+    
+    /* Optimisations pour les onglets sur mobile */
+    .tabs {
+        gap: 5px;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+    }
+    
+    .tabs::-webkit-scrollbar {
+        display: none;
+    }
+    
+    .tab-btn {
+        padding: 10px 16px;
+        font-size: 0.85rem;
+        white-space: nowrap;
+        flex-shrink: 0;
+    }
+    
+    /* Réduire la taille des colonnes sur mobile */
+    .family-column {
+        min-width: 100px;
+        width: 110px;
+        gap: 8px;
+    }
+    
+    /* Réduire la taille des cartes de caractères */
+    .family-column .character-switch-item {
+        min-height: 70px;
+        padding: 8px 6px;
+    }
+    
+    .character-char {
+        font-size: 1.1rem;
+    }
+    
+    .character-romaji {
+        font-size: 0.7rem;
+    }
+    
+    /* Réduire la taille des switches de groupe */
+    .family-column .group-switch-item {
+        padding: 10px 8px;
+        min-height: 120px;
+    }
+    
+    .family-column .group-switch-label {
+        font-size: 0.8rem;
+    }
+    
+    /* Ajuster le conteneur de colonnes */
+    .family-columns {
+        gap: 12px;
+        padding: 8px;
+        min-height: 500px;
+        max-height: 600px;
+    }
+    
+    /* Réduire les espacements dans les sections */
+    .selection-section {
+        padding: 15px;
+    }
+    
+    .button-group-small {
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+    
+    .button-group-small .btn {
+        padding: 8px 16px;
+        font-size: 0.85rem;
+    }
+}
 
+@media (max-width: 480px) {
+    /* Encore plus compact pour très petits écrans */
+    .tab-btn {
+        padding: 8px 12px;
+        font-size: 0.75rem;
+    }
+    
+    .family-column {
+        min-width: 90px;
+        width: 95px;
+    }
+    
+    .family-column .character-switch-item {
+        min-height: 65px;
+        padding: 6px 4px;
+    }
+    
+    .character-char {
+        font-size: 1rem;
+    }
+    
+    .character-romaji {
+        font-size: 0.65rem;
+    }
+    
+    .family-column .group-switch-item {
+        padding: 8px 6px;
+        min-height: 100px;
+    }
+    
+    .family-column .group-switch-label {
+        font-size: 0.7rem;
+    }
+    
+    .family-columns {
+        gap: 8px;
+        padding: 5px;
+    }
+    
+    .selection-section {
+        padding: 12px;
+    }
+    
+    .group-selection h2 {
+        font-size: 1.2rem;
+    }
+    
     .answer-input {
         width: 100%;
     }
