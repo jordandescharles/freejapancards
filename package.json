@@ -1,0 +1,15 @@
+{
+  "name": "freejapancards",
+  "version": "1.0.0",
+  "description": "Application de flashcards pour apprendre Hiragana et Katakana",
+  "scripts": {
+    "build": "node build.js",
+    "build:advanced": "npm run build && npm run minify",
+    "minify": "node minify.js"
+  },
+  "devDependencies": {
+    "csso-cli": "^4.0.0",
+    "terser": "^5.26.0"
+  }
+}
+

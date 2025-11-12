@@ -25,6 +25,28 @@ Une application web interactive pour apprendre et pratiquer les caractères Hira
 - `styles.css` : Styles CSS modernes et responsives
 - `script.js` : Logique JavaScript de l'application
 - `data.js` : Données des caractères et mots japonais
+- `build.js` : Script de build pour optimiser les fichiers
+- `dist/` : Dossier contenant la version optimisée (généré automatiquement)
+
+## Build et Optimisation
+
+Pour créer une version optimisée de l'application :
+
+```bash
+node build.js
+```
+
+Cela va :
+- Minifier le CSS et JavaScript
+- Bundler tous les fichiers JS en un seul
+- Inliner le CSS dans le HTML
+- Créer un fichier `dist/index.html` optimisé (~17% plus léger)
+
+**Gains de performance** :
+- Taille originale : ~101 KB
+- Taille optimisée : ~83 KB
+- Réduction : ~17.6%
+- Requêtes HTTP : 4 fichiers → 1 fichier
 
 ## Technologies utilisées
 
