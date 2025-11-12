@@ -5,6 +5,7 @@ let currentCardIndex = 0;
 let score = 0;
 let totalAnswered = 0;
 let selectedGroups = [];
+let selectionState = {}; // Sauvegarde de l'état de sélection des groupes et caractères
 
 // Éléments DOM
 const menu = document.getElementById('menu');
@@ -40,8 +41,6 @@ function setupEventListeners() {
     // Group selection
     document.getElementById('select-all-groups').addEventListener('click', selectAllGroups);
     document.getElementById('deselect-all-groups').addEventListener('click', deselectAllGroups);
-    document.getElementById('select-all-characters').addEventListener('click', selectAllCharacters);
-    document.getElementById('deselect-all-characters').addEventListener('click', deselectAllCharacters);
     document.getElementById('start-test').addEventListener('click', startTest);
     document.getElementById('back-to-menu').addEventListener('click', showMenu);
 
@@ -88,43 +87,147 @@ function showGroupSelection(mode) {
     groupSelection.classList.remove('hidden');
     headerBackBtn.classList.remove('hidden');
     
-    const groupCheckboxes = document.getElementById('group-checkboxes');
-    const characterCheckboxes = document.getElementById('character-checkboxes');
-    groupCheckboxes.innerHTML = '';
-    characterCheckboxes.innerHTML = '';
+    const familyColumns = document.getElementById('family-columns');
+    familyColumns.innerHTML = '';
     
     const data = mode.includes('hiragana') ? hiraganaData : katakanaData;
-    const groupNames = {
-        basic: 'Basique (あ-お)',
-        k: 'K (か-こ)',
-        s: 'S (さ-そ)',
-        t: 'T (た-と)',
-        n: 'N (な-の)',
-        h: 'H (は-ほ)',
-        m: 'M (ま-も)',
-        y: 'Y (や-よ)',
-        r: 'R (ら-ろ)',
-        w: 'W (わ-を-ん)',
-        g: 'G (が-ご)',
-        z: 'Z (ざ-ぞ)',
-        d: 'D (だ-ど)',
-        b: 'B (ば-ぼ)',
-        p: 'P (ぱ-ぽ)',
-        kya: 'Kya (きゃ-きょ)',
-        sha: 'Sha (しゃ-しょ)',
-        cha: 'Cha (ちゃ-ちょ)',
-        nya: 'Nya (にゃ-にょ)',
-        hya: 'Hya (ひゃ-ひょ)',
-        mya: 'Mya (みゃ-みょ)',
-        rya: 'Rya (りゃ-りょ)',
-        gya: 'Gya (ぎゃ-ぎょ)',
-        ja: 'Ja (じゃ-じょ)',
-        bya: 'Bya (びゃ-びょ)',
-        pya: 'Pya (ぴゃ-ぴょ)'
+    const hiraganaTabs = document.getElementById('hiragana-tabs');
+    const katakanaTabs = document.getElementById('katakana-tabs');
+    
+    // Afficher les onglets selon le mode
+    if (mode.includes('hiragana')) {
+        hiraganaTabs.classList.remove('hidden');
+        katakanaTabs.classList.add('hidden');
+        setupTabs(mode, 'hiragana-tabs', hiraganaData);
+    } else if (mode.includes('katakana')) {
+        hiraganaTabs.classList.add('hidden');
+        katakanaTabs.classList.remove('hidden');
+        setupTabs(mode, 'katakana-tabs', katakanaData);
+    } else {
+        hiraganaTabs.classList.add('hidden');
+        katakanaTabs.classList.add('hidden');
+        renderFamilyColumns(data, mode, null);
+    }
+}
+
+function setupTabs(mode, tabsContainerId, data) {
+    const tabButtons = document.querySelectorAll(`#${tabsContainerId} .tab-btn`);
+    
+    // Catégories de groupes (identique pour hiragana et katakana)
+    const categories = {
+        simple: ['basic', 'k', 's', 't', 'n', 'h', 'm', 'y', 'r', 'w'],
+        matere: ['g', 'z', 'd', 'b', 'p'],
+        composite: ['kya', 'sha', 'cha', 'nya', 'hya', 'mya', 'rya', 'gya', 'ja', 'bya', 'pya']
     };
     
-    // Créer les switches de groupes
-    Object.keys(data).forEach(group => {
+    // Retirer les anciens event listeners en clonant les boutons
+    tabButtons.forEach(btn => {
+        const newBtn = btn.cloneNode(true);
+        btn.parentNode.replaceChild(newBtn, btn);
+    });
+    
+    // Ajouter les nouveaux event listeners
+    const newTabButtons = document.querySelectorAll(`#${tabsContainerId} .tab-btn`);
+    newTabButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+            // Sauvegarder l'état de sélection actuel avant de changer d'onglet
+            saveSelectionState();
+            
+            // Retirer la classe active de tous les boutons
+            newTabButtons.forEach(b => b.classList.remove('active'));
+            // Ajouter la classe active au bouton cliqué
+            btn.classList.add('active');
+            
+            // Rendre les colonnes selon la catégorie sélectionnée
+            const category = btn.dataset.tab;
+            renderFamilyColumns(data, mode, categories[category]);
+        });
+    });
+    
+    // Afficher par défaut les simples
+    renderFamilyColumns(data, mode, categories.simple);
+}
+
+function saveSelectionState() {
+    // Sauvegarder l'état de tous les groupes et caractères visibles
+    const groupCheckboxes = document.querySelectorAll('#family-columns input[type="checkbox"][id^="group-"]');
+    const charCheckboxes = document.querySelectorAll('#family-columns input[type="checkbox"][id^="char-"]');
+    
+    groupCheckboxes.forEach(cb => {
+        const groupId = cb.id.replace('group-', '');
+        if (!selectionState[groupId]) {
+            selectionState[groupId] = {};
+        }
+        selectionState[groupId].groupChecked = cb.checked;
+    });
+    
+    charCheckboxes.forEach(cb => {
+        const [groupId, index] = cb.value.split('-');
+        if (!selectionState[groupId]) {
+            selectionState[groupId] = {};
+        }
+        if (!selectionState[groupId].characters) {
+            selectionState[groupId].characters = {};
+        }
+        selectionState[groupId].characters[index] = cb.checked;
+    });
+}
+
+function restoreSelectionState(group) {
+    // Restaurer l'état sauvegardé pour un groupe spécifique
+    if (!selectionState[group]) {
+        return { groupChecked: true, characters: {} };
+    }
+    return selectionState[group];
+}
+
+function renderFamilyColumns(data, mode, filterGroups) {
+    const familyColumns = document.getElementById('family-columns');
+    familyColumns.innerHTML = '';
+    
+    // Noms de groupes selon le mode (hiragana ou katakana)
+    const isKatakana = mode.includes('katakana');
+    const groupNames = {
+        basic: isKatakana ? 'Basique (ア-オ)' : 'Basique (あ-お)',
+        k: isKatakana ? 'K (カ-コ)' : 'K (か-こ)',
+        s: isKatakana ? 'S (サ-ソ)' : 'S (さ-そ)',
+        t: isKatakana ? 'T (タ-ト)' : 'T (た-と)',
+        n: isKatakana ? 'N (ナ-ノ)' : 'N (な-の)',
+        h: isKatakana ? 'H (ハ-ホ)' : 'H (は-ほ)',
+        m: isKatakana ? 'M (マ-モ)' : 'M (ま-も)',
+        y: isKatakana ? 'Y (ヤ-ヨ)' : 'Y (や-よ)',
+        r: isKatakana ? 'R (ラ-ロ)' : 'R (ら-ろ)',
+        w: isKatakana ? 'W (ワ-ヲ-ン)' : 'W (わ-を-ん)',
+        g: isKatakana ? 'G (ガ-ゴ)' : 'G (が-ご)',
+        z: isKatakana ? 'Z (ザ-ゾ)' : 'Z (ざ-ぞ)',
+        d: isKatakana ? 'D (ダ-ド)' : 'D (だ-ど)',
+        b: isKatakana ? 'B (バ-ボ)' : 'B (ば-ぼ)',
+        p: isKatakana ? 'P (パ-ポ)' : 'P (ぱ-ぽ)',
+        kya: isKatakana ? 'Kya (キャ-キョ)' : 'Kya (きゃ-きょ)',
+        sha: isKatakana ? 'Sha (シャ-ショ)' : 'Sha (しゃ-しょ)',
+        cha: isKatakana ? 'Cha (チャ-チョ)' : 'Cha (ちゃ-ちょ)',
+        nya: isKatakana ? 'Nya (ニャ-ニョ)' : 'Nya (にゃ-にょ)',
+        hya: isKatakana ? 'Hya (ヒャ-ヒョ)' : 'Hya (ひゃ-ひょ)',
+        mya: isKatakana ? 'Mya (ミャ-ミョ)' : 'Mya (みゃ-みょ)',
+        rya: isKatakana ? 'Rya (リャ-リョ)' : 'Rya (りゃ-りょ)',
+        gya: isKatakana ? 'Gya (ギャ-ギョ)' : 'Gya (ぎゃ-ぎょ)',
+        ja: isKatakana ? 'Ja (ジャ-ジョ)' : 'Ja (じゃ-じょ)',
+        bya: isKatakana ? 'Bya (ビャ-ビョ)' : 'Bya (びゃ-びょ)',
+        pya: isKatakana ? 'Pya (ピャ-ピョ)' : 'Pya (ぴゃ-ぴょ)'
+    };
+    
+    // Filtrer les groupes si nécessaire
+    const groupsToRender = filterGroups 
+        ? Object.keys(data).filter(group => filterGroups.includes(group))
+        : Object.keys(data);
+    
+    // Créer une colonne pour chaque famille avec son switch et ses caractères
+    groupsToRender.forEach(group => {
+        // Créer la colonne de famille
+        const familyColumn = document.createElement('div');
+        familyColumn.className = 'family-column';
+        
+        // Créer le switch de groupe en haut de la colonne
         const switchItem = document.createElement('div');
         switchItem.className = 'group-switch-item active';
         
@@ -139,7 +242,11 @@ function showGroupSelection(mode) {
         groupSwitch.type = 'checkbox';
         groupSwitch.id = `group-${group}`;
         groupSwitch.value = group;
-        groupSwitch.checked = true;
+        
+        // Restaurer l'état sauvegardé ou utiliser true par défaut
+        const savedState = restoreSelectionState(group);
+        groupSwitch.checked = savedState.groupChecked !== undefined ? savedState.groupChecked : true;
+        
         groupSwitch.addEventListener('change', () => {
             updateGroupSwitchItem(switchItem, groupSwitch.checked);
             toggleGroupCharacters(group, groupSwitch.checked);
@@ -161,22 +268,16 @@ function showGroupSelection(mode) {
             }
         });
         
-        groupCheckboxes.appendChild(switchItem);
-    });
-    
-    // Créer les checkboxes individuelles organisées par famille
-    Object.keys(data).forEach(group => {
+        familyColumn.appendChild(switchItem);
+        
+        // Créer le conteneur pour les caractères individuels
         const groupDiv = document.createElement('div');
         groupDiv.className = 'character-group';
-        
-        const title = document.createElement('div');
-        title.className = 'character-group-title';
-        title.textContent = groupNames[group] || group;
-        groupDiv.appendChild(title);
         
         const itemsDiv = document.createElement('div');
         itemsDiv.className = 'character-items';
         
+        // Créer les caractères individuels de cette famille
         data[group].forEach((char, index) => {
             const charDiv = document.createElement('div');
             charDiv.className = 'character-switch-item active';
@@ -191,31 +292,41 @@ function showGroupSelection(mode) {
             romajiSpan.className = 'character-romaji';
             romajiSpan.textContent = char.romaji;
             
-            const switchContainer = document.createElement('label');
-            switchContainer.className = 'switch';
+            const charSwitchContainer = document.createElement('label');
+            charSwitchContainer.className = 'switch';
             
             const checkbox = document.createElement('input');
             checkbox.type = 'checkbox';
             checkbox.id = `char-${group}-${index}`;
             checkbox.value = `${group}-${index}`;
-            checkbox.checked = true;
+            
+            // Restaurer l'état sauvegardé ou utiliser true par défaut
+            const savedState = restoreSelectionState(group);
+            const charChecked = savedState.characters && savedState.characters[index] !== undefined 
+                ? savedState.characters[index] 
+                : true;
+            checkbox.checked = charChecked;
+            
             checkbox.addEventListener('change', () => {
                 updateCharacterSwitchState(charDiv, checkbox.checked);
                 updateGroupCheckboxState(group);
             });
             
-            const slider = document.createElement('span');
-            slider.className = 'slider';
+            const charSlider = document.createElement('span');
+            charSlider.className = 'slider';
             
-            switchContainer.appendChild(checkbox);
-            switchContainer.appendChild(slider);
+            charSwitchContainer.appendChild(checkbox);
+            charSwitchContainer.appendChild(charSlider);
             
             charDiv.appendChild(charSpan);
             charDiv.appendChild(romajiSpan);
-            charDiv.appendChild(switchContainer);
+            charDiv.appendChild(charSwitchContainer);
+            
+            // Mettre à jour l'état visuel selon la valeur restaurée
+            updateCharacterSwitchState(charDiv, checkbox.checked);
             
             charDiv.addEventListener('click', (e) => {
-                if (e.target !== checkbox && e.target !== slider && !switchContainer.contains(e.target)) {
+                if (e.target !== checkbox && e.target !== charSlider && !charSwitchContainer.contains(e.target)) {
                     checkbox.checked = !checkbox.checked;
                     checkbox.dispatchEvent(new Event('change'));
                 }
@@ -225,7 +336,13 @@ function showGroupSelection(mode) {
         });
         
         groupDiv.appendChild(itemsDiv);
-        characterCheckboxes.appendChild(groupDiv);
+        familyColumn.appendChild(groupDiv);
+        
+        // Mettre à jour l'état visuel du switch de groupe selon la valeur restaurée
+        updateGroupSwitchItem(switchItem, groupSwitch.checked);
+        
+        // Ajouter la colonne au conteneur principal
+        familyColumns.appendChild(familyColumn);
     });
 }
 
@@ -340,42 +457,24 @@ function showLevelSelection(mode) {
 }
 
 function selectAllGroups() {
-    document.querySelectorAll('#group-checkboxes input[type="checkbox"]').forEach(cb => {
+    document.querySelectorAll('#family-columns input[type="checkbox"][id^="group-"]').forEach(cb => {
         cb.checked = true;
         cb.dispatchEvent(new Event('change'));
     });
 }
 
 function deselectAllGroups() {
-    document.querySelectorAll('#group-checkboxes input[type="checkbox"]').forEach(cb => {
+    document.querySelectorAll('#family-columns input[type="checkbox"][id^="group-"]').forEach(cb => {
         cb.checked = false;
         cb.dispatchEvent(new Event('change'));
     });
 }
 
-function selectAllCharacters() {
-    document.querySelectorAll('#character-checkboxes input[type="checkbox"]').forEach(cb => {
-        cb.checked = true;
-        cb.dispatchEvent(new Event('change'));
-    });
-    // Mettre à jour les groupes
-    const data = currentMode.includes('hiragana') ? hiraganaData : katakanaData;
-    Object.keys(data).forEach(group => updateGroupCheckboxState(group));
-}
-
-function deselectAllCharacters() {
-    document.querySelectorAll('#character-checkboxes input[type="checkbox"]').forEach(cb => {
-        cb.checked = false;
-        cb.dispatchEvent(new Event('change'));
-    });
-    // Mettre à jour les groupes
-    const data = currentMode.includes('hiragana') ? hiraganaData : katakanaData;
-    Object.keys(data).forEach(group => updateGroupCheckboxState(group));
-}
 
 function startTest() {
     // Récupérer les caractères sélectionnés individuellement
-    const checkedCharacters = Array.from(document.querySelectorAll('#character-checkboxes input[type="checkbox"]:checked'))
+    const checkedCharacters = Array.from(document.querySelectorAll('#family-columns input[type="checkbox"]:checked'))
+        .filter(cb => cb.id.startsWith('char-'))
         .map(cb => {
             const [group, index] = cb.value.split('-');
             return { group, index: parseInt(index) };

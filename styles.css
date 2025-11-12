@@ -144,12 +144,102 @@ header h1 {
     background: #f9f9f9;
     border-radius: 10px;
     border: 1px solid #e0e0e0;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
 }
 
 .selection-section h3 {
     margin-bottom: 15px;
     color: #667eea;
     font-size: 1.2rem;
+}
+
+/* Tabs */
+.tabs-container {
+    margin-bottom: 20px;
+}
+
+.tabs {
+    display: flex;
+    gap: 10px;
+    border-bottom: 2px solid #e0e0e0;
+    margin-bottom: 20px;
+}
+
+.tab-btn {
+    padding: 12px 24px;
+    background: transparent;
+    border: none;
+    border-bottom: 3px solid transparent;
+    color: #666;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    bottom: -2px;
+}
+
+.tab-btn:hover {
+    color: #667eea;
+    background: rgba(102, 126, 234, 0.05);
+}
+
+.tab-btn.active {
+    color: #667eea;
+    border-bottom-color: #667eea;
+    font-weight: 600;
+}
+
+.family-columns {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    gap: 20px;
+    margin-top: 20px;
+    justify-content: flex-start;
+    overflow-x: auto;
+    overflow-y: auto;
+    padding: 10px;
+    width: 100%;
+    align-items: flex-start;
+    min-height: 600px;
+    max-height: 700px;
+}
+
+.family-columns::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+.family-columns::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+
+.family-columns::-webkit-scrollbar-thumb {
+    background: #667eea;
+    border-radius: 10px;
+}
+
+.family-columns::-webkit-scrollbar-thumb:hover {
+    background: #5568d3;
+}
+
+.family-columns::-webkit-scrollbar-corner {
+    background: #f1f1f1;
+}
+
+.family-column {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    min-width: 120px;
+    width: 140px;
+    flex-shrink: 0;
+    gap: 12px;
+    max-height: 100%;
 }
 
 .group-checkboxes {
@@ -173,6 +263,18 @@ header h1 {
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
     flex: 0 1 auto;
     min-width: 140px;
+    width: 100%;
+}
+
+.family-column .group-switch-item {
+    min-width: 100%;
+    width: 100%;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 15px 12px;
+    min-height: 150px;
 }
 
 .group-switch-item:hover {
@@ -193,6 +295,13 @@ header h1 {
     font-weight: 500;
     color: #333;
     font-size: 1rem;
+}
+
+.family-column .group-switch-label {
+    flex: none;
+    text-align: center;
+    width: 100%;
+    margin-bottom: 0;
 }
 
 .character-checkboxes {
@@ -227,6 +336,19 @@ header h1 {
     margin-bottom: 20px;
 }
 
+.family-column .character-group {
+    width: 100%;
+    margin-bottom: 0;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+}
+
+.family-column .character-group-title {
+    display: none;
+}
+
 .character-group-title {
     font-weight: bold;
     color: #555;
@@ -240,6 +362,34 @@ header h1 {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
     gap: 10px;
+}
+
+.family-column .character-items {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    gap: 8px;
+    flex: 1;
+    overflow-y: auto;
+    min-height: 0;
+}
+
+.family-column .character-items::-webkit-scrollbar {
+    width: 6px;
+}
+
+.family-column .character-items::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+
+.family-column .character-items::-webkit-scrollbar-thumb {
+    background: #667eea;
+    border-radius: 10px;
+}
+
+.family-column .character-items::-webkit-scrollbar-thumb:hover {
+    background: #5568d3;
 }
 
 .character-switch-item {
@@ -258,12 +408,12 @@ header h1 {
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
-.character-switch-item:hover {
-    background: #f8f9ff;
-    border-color: #667eea;
-    transform: translateY(-4px) scale(1.02);
-    box-shadow: 0 6px 16px rgba(102, 126, 234, 0.2);
+.family-column .character-switch-item {
+    width: 100%;
+    min-height: 85px;
+    padding: 12px 8px;
 }
+
 
 .character-switch-item.active {
     background: linear-gradient(135deg, #e8f0fe 0%, #f0f4ff 100%);
@@ -293,14 +443,14 @@ header h1 {
 }
 
 .character-char {
-    font-size: 1.5rem;
+    font-size: 1.25rem;
     font-weight: bold;
     margin-bottom: 3px;
     color: #333;
 }
 
 .character-romaji {
-    font-size: 0.75rem;
+    font-size: 1rem;
     color: #666;
     text-transform: lowercase;
 }

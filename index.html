@@ -48,24 +48,31 @@
         <div id="group-selection" class="group-selection hidden">
             <h2>Sélectionnez les caractères à pratiquer</h2>
             
-            <!-- Sélection par famille -->
+            <!-- Onglets pour les hiraganas -->
+            <div id="hiragana-tabs" class="tabs-container hidden">
+                <div class="tabs">
+                    <button class="tab-btn active" data-tab="simple">Basiques</button>
+                    <button class="tab-btn" data-tab="matere">Avec accents</button>
+                    <button class="tab-btn" data-tab="composite">Combinés</button>
+                </div>
+            </div>
+            
+            <!-- Onglets pour les katakanas -->
+            <div id="katakana-tabs" class="tabs-container hidden">
+                <div class="tabs">
+                    <button class="tab-btn active" data-tab="simple">Basiques</button>
+                    <button class="tab-btn" data-tab="matere">Avec accents</button>
+                    <button class="tab-btn" data-tab="composite">Combinés</button>
+                </div>
+            </div>
+            
+            <!-- Sélection par famille avec caractères individuels -->
             <div class="selection-section">
-                <h3>Sélection par famille</h3>
-                <div id="group-checkboxes" class="group-checkboxes"></div>
                 <div class="button-group-small">
                     <button id="select-all-groups" class="btn btn-secondary">Tout sélectionner</button>
                     <button id="deselect-all-groups" class="btn btn-secondary">Tout désélectionner</button>
                 </div>
-            </div>
-            
-            <!-- Sélection individuelle -->
-            <div class="selection-section">
-                <h3>Sélection individuelle</h3>
-                <div id="character-checkboxes" class="character-checkboxes"></div>
-                <div class="button-group-small">
-                    <button id="select-all-characters" class="btn btn-secondary">Tout sélectionner</button>
-                    <button id="deselect-all-characters" class="btn btn-secondary">Tout désélectionner</button>
-                </div>
+                <div id="family-columns" class="family-columns"></div>
             </div>
             
             <div class="button-group">
