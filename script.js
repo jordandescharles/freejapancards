@@ -22,12 +22,19 @@ const translationDisplay = document.getElementById('translation-display');
 const progressFill = document.getElementById('progress');
 const scoreDisplay = document.getElementById('score');
 const totalDisplay = document.getElementById('total');
-const headerBackBtn = document.getElementById('header-back-menu');
 
 // Initialisation
 document.addEventListener('DOMContentLoaded', () => {
     setupEventListeners();
+    updateCurrentYear();
 });
+
+function updateCurrentYear() {
+    const yearElement = document.getElementById('current-year');
+    if (yearElement) {
+        yearElement.textContent = new Date().getFullYear();
+    }
+}
 
 function setupEventListeners() {
     // Menu cards
@@ -39,10 +46,20 @@ function setupEventListeners() {
     });
 
     // Group selection
-    document.getElementById('select-all-groups').addEventListener('click', selectAllGroups);
-    document.getElementById('deselect-all-groups').addEventListener('click', deselectAllGroups);
+    // Gérer la checkbox toggle
+    document.addEventListener('change', (e) => {
+        if (e.target && e.target.id === 'toggle-all-groups-checkbox') {
+            toggleAllGroups();
+        }
+    });
     document.getElementById('start-test').addEventListener('click', startTest);
     document.getElementById('back-to-menu').addEventListener('click', showMenu);
+    
+    // Header link
+    document.getElementById('header-link').addEventListener('click', (e) => {
+        e.preventDefault();
+        showMenu();
+    });
 
     // Level selection
     document.getElementById('back-to-menu-words').addEventListener('click', showMenu);
@@ -57,8 +74,6 @@ function setupEventListeners() {
     document.getElementById('restart-from-results').addEventListener('click', restartTest);
     document.getElementById('back-to-menu-results').addEventListener('click', showMenu);
     
-    // Header back button
-    headerBackBtn.addEventListener('click', showMenu);
 
     // Enter key support
     answerInput.addEventListener('keypress', (e) => {
@@ -85,7 +100,6 @@ function handleModeSelection(mode) {
 function showGroupSelection(mode) {
     menu.classList.add('hidden');
     groupSelection.classList.remove('hidden');
-    headerBackBtn.classList.remove('hidden');
     
     const familyColumns = document.getElementById('family-columns');
     familyColumns.innerHTML = '';
@@ -141,11 +155,22 @@ function setupTabs(mode, tabsContainerId, data) {
             // Rendre les colonnes selon la catégorie sélectionnée
             const category = btn.dataset.tab;
             renderFamilyColumns(data, mode, categories[category]);
+            // Mettre à jour les notifications et le texte du bouton après le rendu
+            setTimeout(() => {
+                updateTabNotifications(mode);
+                updateToggleButtonText();
+            }, 100);
         });
     });
     
     // Afficher par défaut les simples
     renderFamilyColumns(data, mode, categories.simple);
+    
+    // Mettre à jour les notifications des onglets et le texte du bouton après le rendu initial
+    setTimeout(() => {
+        updateTabNotifications(mode);
+        updateToggleButtonText();
+    }, 100);
 }
 
 function saveSelectionState() {
@@ -176,7 +201,10 @@ function saveSelectionState() {
 function restoreSelectionState(group) {
     // Restaurer l'état sauvegardé pour un groupe spécifique
     if (!selectionState[group]) {
-        return { groupChecked: true, characters: {} };
+        // Par défaut, tous les groupes de l'onglet "simple" sont sélectionnés
+        const simpleGroups = ['basic', 'k', 's', 't', 'n', 'h', 'm', 'y', 'r', 'w'];
+        const isInSimpleTab = simpleGroups.includes(group);
+        return { groupChecked: isInSimpleTab, characters: {} };
     }
     return selectionState[group];
 }
@@ -243,13 +271,17 @@ function renderFamilyColumns(data, mode, filterGroups) {
         groupSwitch.id = `group-${group}`;
         groupSwitch.value = group;
         
-        // Restaurer l'état sauvegardé ou utiliser true par défaut
+        // Restaurer l'état sauvegardé ou utiliser la valeur par défaut selon l'onglet
         const savedState = restoreSelectionState(group);
-        groupSwitch.checked = savedState.groupChecked !== undefined ? savedState.groupChecked : true;
+        const simpleGroups = ['basic', 'k', 's', 't', 'n', 'h', 'm', 'y', 'r', 'w'];
+        const defaultChecked = simpleGroups.includes(group);
+        groupSwitch.checked = savedState.groupChecked !== undefined ? savedState.groupChecked : defaultChecked;
         
         groupSwitch.addEventListener('change', () => {
             updateGroupSwitchItem(switchItem, groupSwitch.checked);
             toggleGroupCharacters(group, groupSwitch.checked);
+            updateTabNotifications(mode);
+            updateToggleButtonText();
         });
         
         const slider = document.createElement('span');
@@ -300,16 +332,20 @@ function renderFamilyColumns(data, mode, filterGroups) {
             checkbox.id = `char-${group}-${index}`;
             checkbox.value = `${group}-${index}`;
             
-            // Restaurer l'état sauvegardé ou utiliser true par défaut
+            // Restaurer l'état sauvegardé ou utiliser la valeur par défaut selon l'onglet
             const savedState = restoreSelectionState(group);
+            const simpleGroups = ['basic', 'k', 's', 't', 'n', 'h', 'm', 'y', 'r', 'w'];
+            const defaultChecked = simpleGroups.includes(group);
             const charChecked = savedState.characters && savedState.characters[index] !== undefined 
                 ? savedState.characters[index] 
-                : true;
+                : defaultChecked;
             checkbox.checked = charChecked;
             
             checkbox.addEventListener('change', () => {
                 updateCharacterSwitchState(charDiv, checkbox.checked);
                 updateGroupCheckboxState(group);
+                updateTabNotifications(mode);
+                updateToggleButtonText();
             });
             
             const charSlider = document.createElement('span');
@@ -422,10 +458,84 @@ function updateGroupCheckboxState(group) {
     }
 }
 
+function updateTabNotifications(mode) {
+    const data = mode && mode.includes('hiragana') ? hiraganaData : katakanaData;
+    if (!data) return;
+    
+    // Catégories de groupes
+    const categories = {
+        simple: ['basic', 'k', 's', 't', 'n', 'h', 'm', 'y', 'r', 'w'],
+        matere: ['g', 'z', 'd', 'b', 'p'],
+        composite: ['kya', 'sha', 'cha', 'nya', 'hya', 'mya', 'rya', 'gya', 'ja', 'bya', 'pya']
+    };
+    
+    // Déterminer le conteneur d'onglets selon le mode
+    const tabsContainerId = mode.includes('hiragana') ? 'hiragana-tabs' : 'katakana-tabs';
+    const tabsContainer = document.getElementById(tabsContainerId);
+    if (!tabsContainer) return;
+    
+    // Pour chaque catégorie d'onglet
+    Object.keys(categories).forEach(category => {
+        const tabBtn = tabsContainer.querySelector(`.tab-btn[data-tab="${category}"]`);
+        if (!tabBtn) return;
+        
+        // Compter les caractères non sélectionnés dans cette catégorie
+        let unselectedCount = 0;
+        categories[category].forEach(group => {
+            if (!data[group]) return;
+            
+            // Compter les caractères non sélectionnés dans ce groupe
+            const groupCheckbox = document.getElementById(`group-${group}`);
+            if (groupCheckbox) {
+                // Le groupe est rendu, compter les caractères non sélectionnés
+                const allCharCheckboxes = document.querySelectorAll(`input[type="checkbox"][id^="char-${group}-"]`);
+                allCharCheckboxes.forEach(checkbox => {
+                    if (!checkbox.checked) {
+                        unselectedCount++;
+                    }
+                });
+            } else {
+                // Le groupe n'est pas encore rendu, utiliser l'état sauvegardé ou la valeur par défaut
+                const savedState = restoreSelectionState(group);
+                const simpleGroups = ['basic', 'k', 's', 't', 'n', 'h', 'm', 'y', 'r', 'w'];
+                const isInSimpleTab = simpleGroups.includes(group);
+                
+                if (savedState.groupChecked === false || (savedState.groupChecked === undefined && !isInSimpleTab)) {
+                    // Tous les caractères sont non sélectionnés
+                    unselectedCount += data[group].length;
+                } else if (savedState.characters && Object.keys(savedState.characters).length > 0) {
+                    // Compter les caractères non sélectionnés dans l'état sauvegardé
+                    data[group].forEach((char, index) => {
+                        if (!savedState.characters[index]) {
+                            unselectedCount++;
+                        }
+                    });
+                } else if (!isInSimpleTab) {
+                    // Par défaut, tous les caractères des groupes non dans l'onglet "simple" sont non sélectionnés
+                    unselectedCount += data[group].length;
+                }
+            }
+        });
+        
+        // Retirer l'ancienne pastille si elle existe
+        const existingBadge = tabBtn.querySelector('.tab-notification-badge');
+        if (existingBadge) {
+            existingBadge.remove();
+        }
+        
+        // Ajouter une pastille rouge si il y a des caractères non sélectionnés
+        if (unselectedCount > 0) {
+            const badge = document.createElement('span');
+            badge.className = 'tab-notification-badge';
+            badge.textContent = unselectedCount > 99 ? '99+' : unselectedCount;
+            tabBtn.appendChild(badge);
+        }
+    });
+}
+
 function showLevelSelection(mode) {
     menu.classList.add('hidden');
     levelSelection.classList.remove('hidden');
-    headerBackBtn.classList.remove('hidden');
     
     const levelButtons = document.getElementById('level-buttons');
     levelButtons.innerHTML = '';
@@ -456,18 +566,59 @@ function showLevelSelection(mode) {
     });
 }
 
-function selectAllGroups() {
-    document.querySelectorAll('#family-columns input[type="checkbox"][id^="group-"]').forEach(cb => {
-        cb.checked = true;
+function toggleAllGroups() {
+    const allGroupCheckboxes = document.querySelectorAll('#family-columns input[type="checkbox"][id^="group-"]');
+    const toggleCheckbox = document.getElementById('toggle-all-groups-checkbox');
+    
+    if (allGroupCheckboxes.length === 0) return;
+    
+    // Vérifier si tous les groupes sont sélectionnés
+    const allChecked = Array.from(allGroupCheckboxes).every(cb => cb.checked);
+    
+    // Inverser l'état de tous les groupes
+    allGroupCheckboxes.forEach(cb => {
+        cb.checked = !allChecked;
         cb.dispatchEvent(new Event('change'));
     });
+    
+    // Mettre à jour la checkbox toggle et les notifications
+    if (toggleCheckbox) {
+        toggleCheckbox.checked = !allChecked;
+    }
+    updateTabNotifications(currentMode);
 }
 
-function deselectAllGroups() {
-    document.querySelectorAll('#family-columns input[type="checkbox"][id^="group-"]').forEach(cb => {
-        cb.checked = false;
-        cb.dispatchEvent(new Event('change'));
-    });
+function updateToggleButtonText() {
+    const toggleCheckbox = document.getElementById('toggle-all-groups-checkbox');
+    if (!toggleCheckbox) return;
+    
+    const toggleText = document.querySelector('.toggle-checkbox-text');
+    const allGroupCheckboxes = document.querySelectorAll('#family-columns input[type="checkbox"][id^="group-"]');
+    
+    if (allGroupCheckboxes.length === 0) {
+        toggleCheckbox.checked = false;
+        toggleCheckbox.indeterminate = false;
+        if (toggleText) toggleText.textContent = 'Tout sélectionner';
+        return;
+    }
+    
+    // Vérifier si tous les groupes sont sélectionnés
+    const allChecked = Array.from(allGroupCheckboxes).every(cb => cb.checked);
+    const someChecked = Array.from(allGroupCheckboxes).some(cb => cb.checked);
+    
+    if (allChecked) {
+        toggleCheckbox.checked = true;
+        toggleCheckbox.indeterminate = false;
+        if (toggleText) toggleText.textContent = 'Tout désélectionner';
+    } else if (someChecked) {
+        toggleCheckbox.checked = false;
+        toggleCheckbox.indeterminate = true;
+        if (toggleText) toggleText.textContent = 'Tout sélectionner';
+    } else {
+        toggleCheckbox.checked = false;
+        toggleCheckbox.indeterminate = false;
+        if (toggleText) toggleText.textContent = 'Tout sélectionner';
+    }
 }
 
 
@@ -530,7 +681,6 @@ function startCardTest() {
     groupSelection.classList.add('hidden');
     levelSelection.classList.add('hidden');
     testArea.classList.remove('hidden');
-    headerBackBtn.classList.remove('hidden');
     
     currentCardIndex = 0;
     score = 0;
@@ -583,6 +733,31 @@ function displayCard() {
     checkAnswerBtn.classList.remove('hidden');
 }
 
+function findRandomWordWithCharacter(character) {
+    // Trouver un mot aléatoire contenant le caractère testé
+    const isHiragana = currentMode && currentMode.includes('hiragana');
+    const wordsData = isHiragana ? hiraganaWords : katakanaWords;
+    
+    // Collecter tous les mots de tous les niveaux qui contiennent ce caractère
+    const matchingWords = [];
+    
+    Object.keys(wordsData).forEach(level => {
+        wordsData[level].forEach(word => {
+            if (word.word.includes(character)) {
+                matchingWords.push(word);
+            }
+        });
+    });
+    
+    // Retourner un mot aléatoire s'il y en a
+    if (matchingWords.length > 0) {
+        const randomIndex = Math.floor(Math.random() * matchingWords.length);
+        return matchingWords[randomIndex];
+    }
+    
+    return null;
+}
+
 function checkAnswer() {
     const userAnswer = answerInput.value.trim().toLowerCase();
     const card = currentCards[currentCardIndex];
@@ -603,6 +778,21 @@ function checkAnswer() {
                 message += ` | 🇬🇧 ${card.english}`;
             }
         }
+        
+        // Ajouter un mot aléatoire contenant ce caractère (seulement pour les tests de caractères, pas pour les mots)
+        if (!card.meaning && card.char) {
+            const exampleWord = findRandomWordWithCharacter(card.char);
+            if (exampleWord) {
+                message += `\n\n💡 Exemple: ${exampleWord.word} (${exampleWord.romaji})`;
+                if (exampleWord.meaning) {
+                    message += ` - 🇫🇷 ${exampleWord.meaning}`;
+                    if (exampleWord.english) {
+                        message += ` | 🇬🇧 ${exampleWord.english}`;
+                    }
+                }
+            }
+        }
+        
         showFeedback(true, message);
     } else {
         let message = `Incorrect. La bonne réponse est: ${card.romaji}`;
@@ -647,7 +837,6 @@ function updateStats() {
 function finishTest() {
     testArea.classList.add('hidden');
     results.classList.remove('hidden');
-    headerBackBtn.classList.remove('hidden');
     
     const percentage = totalAnswered > 0 ? Math.round((score / totalAnswered) * 100) : 0;
     
@@ -673,7 +862,6 @@ function showMenu() {
     testArea.classList.add('hidden');
     results.classList.add('hidden');
     menu.classList.remove('hidden');
-    headerBackBtn.classList.add('hidden');
     
     currentMode = null;
     currentCards = [];

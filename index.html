@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FREE JAPAN Cards - Apprendre Hiragana et Katakana</title>
+    <link rel="icon" type="image/png" sizes="192x192" href="img/icon-192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="img/icon-512.png">
+    <link rel="apple-touch-icon" href="img/icon-192.png">
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -11,10 +14,9 @@
         <header>
             <div class="header-content">
                 <div class="header-text">
-                    <h1>FREE JAPAN CARDS</h1>
+                    <h1><a href="#" id="header-link" class="header-link">FREE JAPAN CARDS</a></h1>
                     <p class="subtitle">Pratiquez vos connaissances en Hiragana et Katakana</p>
                 </div>
-                <button id="header-back-menu" class="btn btn-secondary header-back-btn hidden">← Retour au menu</button>
             </div>
         </header>
 
@@ -46,7 +48,15 @@
 
         <!-- Sélection de groupes (pour les caractères) -->
         <div id="group-selection" class="group-selection hidden">
-            <h2>Sélectionnez les caractères à pratiquer</h2>
+            <!-- Barre d'actions en haut avec les trois boutons -->
+            <div class="group-selection-header">
+                <div class="header-buttons">
+                    <button id="back-to-menu" class="btn btn-secondary btn-icon" title="Retour au menu">
+                        <span class="icon-back">←</span>
+                    </button>
+                    <button id="start-test" class="btn btn-primary">Commencer le test</button>
+                </div>
+            </div>
             
             <!-- Onglets pour les hiraganas -->
             <div id="hiragana-tabs" class="tabs-container hidden">
@@ -68,16 +78,12 @@
             
             <!-- Sélection par famille avec caractères individuels -->
             <div class="selection-section">
-                <div class="button-group-small">
-                    <button id="select-all-groups" class="btn btn-secondary">Tout sélectionner</button>
-                    <button id="deselect-all-groups" class="btn btn-secondary">Tout désélectionner</button>
-                </div>
+                <label class="toggle-checkbox-label">
+                    <input type="checkbox" id="toggle-all-groups-checkbox">
+                    <span class="checkbox-custom"></span>
+                    <span class="toggle-checkbox-text">Tout sélectionner</span>
+                </label>
                 <div id="family-columns" class="family-columns"></div>
-            </div>
-            
-            <div class="button-group">
-                <button id="start-test" class="btn btn-primary">Commencer le test</button>
-                <button id="back-to-menu" class="btn btn-secondary">Retour au menu</button>
             </div>
         </div>
 
@@ -90,16 +96,6 @@
 
         <!-- Zone de test -->
         <div id="test-area" class="test-area hidden">
-            <div class="test-header">
-                <div class="progress-bar">
-                    <div id="progress" class="progress-fill"></div>
-                </div>
-                <div class="stats">
-                    <span>Score: <strong id="score">0</strong></span>
-                    <span>Total: <strong id="total">0</strong></span>
-                </div>
-            </div>
-
             <div class="flashcard-container">
                 <div class="flashcard" id="flashcard">
                     <div class="card-front">
@@ -120,7 +116,21 @@
             <div class="test-controls">
                 <button id="next-card" class="btn btn-primary hidden">Suivant</button>
                 <button id="finish-test" class="btn btn-secondary hidden">Terminer</button>
-                <button id="restart-test" class="btn btn-secondary">Recommencer</button>
+            </div>
+
+            <div class="test-header">
+                <div class="progress-bar">
+                    <div id="progress" class="progress-fill"></div>
+                </div>
+                <div class="stats">
+                    <span>Score: <strong id="score">0</strong></span>
+                    <span>Total: <strong id="total">0</strong></span>
+                </div>
+                <div class="restart-button-container">
+                    <button id="restart-test" class="btn btn-secondary" title="Recommencer">
+                        <span class="icon-restart">↻</span>
+                    </button>
+                </div>
             </div>
         </div>
 
@@ -142,11 +152,25 @@
                 </div>
             </div>
             <div class="button-group">
-                <button id="restart-from-results" class="btn btn-primary">Recommencer</button>
+                <button id="restart-from-results" class="btn btn-primary" title="Recommencer">
+                    <span class="icon-restart">↻</span>
+                </button>
                 <button id="back-to-menu-results" class="btn btn-secondary">Retour au menu</button>
             </div>
         </div>
     </div>
+
+    <footer class="footer">
+        <div class="footer-content">
+            <span><span id="current-year"></span> no copyright</span>
+            <span class="footer-separator">•</span>
+            <span>Propulsé par <strong>Cursor</strong> & <strong><a href="https://www.instagram.com/jordandesc/" target="_blank" rel="noopener noreferrer" class="footer-link">@jordandesc</a></strong></span>
+            <span class="footer-separator">•</span>
+            <span><a href="about.html" class="footer-link">À propos</a></span>
+            <span class="footer-separator">•</span>
+            <span><a href="release-notes.html" class="footer-link">Release Notes</a></span>
+        </div>
+    </footer>
 
     <script src="data.js"></script>
     <script src="script.js"></script>
