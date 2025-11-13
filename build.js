@@ -56,8 +56,37 @@ if (!fs.existsSync('dist')) {
     fs.mkdirSync('dist');
 }
 
-// Écrire les fichiers
+// Créer le dossier img dans dist s'il n'existe pas
+if (!fs.existsSync('dist/img')) {
+    fs.mkdirSync('dist/img', { recursive: true });
+}
+
+// Copier les fichiers HTML supplémentaires
+const aboutHTML = fs.readFileSync('about.html', 'utf8');
+const releaseNotesHTML = fs.readFileSync('release-notes.html', 'utf8');
+
+// Traiter about.html et release-notes.html de la même manière
+const aboutHTMLProcessed = aboutHTML
+    .replace(/<link rel="stylesheet" href="styles\.css">/, `<style>${minifiedCSS}</style>`)
+    .replace(/<script src="data\.js"><\/script>\s*<script src="script\.js"><\/script>/, `<script>${bundledJS}</script>`)
+    .replace(/<script>[\s\S]*?updateCurrentYear[\s\S]*?<\/script>/, `<script>document.getElementById('current-year').textContent = new Date().getFullYear();</script>`);
+
+const releaseNotesHTMLProcessed = releaseNotesHTML
+    .replace(/<link rel="stylesheet" href="styles\.css">/, `<style>${minifiedCSS}</style>`)
+    .replace(/<script>[\s\S]*?updateCurrentYear[\s\S]*?<\/script>/, `<script>document.getElementById('current-year').textContent = new Date().getFullYear();</script>`);
+
+// Écrire les fichiers HTML
 fs.writeFileSync('dist/index.html', newHTML);
+fs.writeFileSync('dist/about.html', aboutHTMLProcessed);
+fs.writeFileSync('dist/release-notes.html', releaseNotesHTMLProcessed);
+
+// Copier les images
+if (fs.existsSync('img/icon-192.png')) {
+    fs.copyFileSync('img/icon-192.png', 'dist/img/icon-192.png');
+}
+if (fs.existsSync('img/icon-512.png')) {
+    fs.copyFileSync('img/icon-512.png', 'dist/img/icon-512.png');
+}
 
 // Calculer les tailles
 const originalSize = fs.statSync('index.html').size + 
@@ -71,5 +100,10 @@ console.log(`✓ Build terminé !`);
 console.log(`  Taille originale: ${(originalSize / 1024).toFixed(2)} KB`);
 console.log(`  Taille optimisée: ${(newSize / 1024).toFixed(2)} KB`);
 console.log(`  Réduction: ${reduction}%`);
-console.log(`  Fichiers créés dans: dist/index.html`);
+console.log(`  Fichiers créés dans dist/:`);
+console.log(`    - index.html`);
+console.log(`    - about.html`);
+console.log(`    - release-notes.html`);
+console.log(`    - img/icon-192.png`);
+console.log(`    - img/icon-512.png`);
 
