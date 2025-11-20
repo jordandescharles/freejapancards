@@ -718,6 +718,23 @@ input:indeterminate + .slider:before {
     font-weight: bold;
     margin-bottom: 20px;
     text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+    line-height: 1.2;
+    letter-spacing: 0.05em;
+}
+
+/* Améliorer la visibilité des petits caractères pour les consonnes doublées */
+.character-display .small-char {
+    font-size: 0.55em;
+    vertical-align: baseline;
+    position: relative;
+    top: -0.2em;
+    font-weight: 700;
+    opacity: 1;
+    display: inline-block;
+    background: rgba(255, 255, 255, 0.3);
+    padding: 0.05em 0.1em;
+    border-radius: 3px;
+    margin: 0 0.05em;
 }
 
 .translation-display {
@@ -1470,37 +1487,42 @@ input:indeterminate + .slider:before {
 }
 
 .memory-game {
+    background: white;
+    border-radius: 15px;
+    padding: 30px;
     animation: fadeIn 0.5s ease-in;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 .memory-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 15px;
+    margin-bottom: 20px;
     flex-wrap: wrap;
-    gap: 10px;
-    color: white;
+    gap: 15px;
 }
 
 .memory-stats {
     display: flex;
-    gap: 15px;
-    font-size: 0.9rem;
+    gap: 20px;
+    font-size: 1rem;
     flex-wrap: wrap;
 }
 
 .memory-stats span {
-    background: rgba(255, 255, 255, 0.2);
-    padding: 6px 12px;
-    border-radius: 8px;
-    backdrop-filter: blur(10px);
+    color: #333;
+}
+
+.memory-stats strong {
+    color: #667eea;
+    font-size: 1.2rem;
 }
 
 .memory-board {
-    max-width: 600px;
+    max-width: 550px;
     margin: 0 auto;
-    padding: 15px;
+    padding: 0;
 }
 
 .memory-match-container {
@@ -1511,18 +1533,20 @@ input:indeterminate + .slider:before {
 }
 
 .memory-column {
-    background: white;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
     border-radius: 10px;
     padding: 15px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .memory-column-title {
     text-align: center;
-    font-size: 1rem;
+    font-size: 0.95rem;
     margin-bottom: 12px;
     color: #333;
     font-weight: bold;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #667eea;
 }
 
 .memory-list {
@@ -1532,24 +1556,24 @@ input:indeterminate + .slider:before {
 }
 
 .memory-item {
-    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    background: white;
     border: 2px solid #e0e0e0;
     border-radius: 8px;
-    padding: 12px;
+    padding: 10px;
     text-align: center;
     cursor: pointer;
     transition: all 0.3s ease;
     font-weight: bold;
-    height: 60px;
+    height: 50px;
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
-.memory-item:hover:not(.matched) {
-    transform: translateY(-3px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+.memory-item:hover:not(.matched):not(.wrong) {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(102, 126, 234, 0.2);
     border-color: #667eea;
 }
 
@@ -1557,21 +1581,21 @@ input:indeterminate + .slider:before {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
     border-color: #5568d3;
-    transform: scale(1.05);
-    box-shadow: 0 6px 12px rgba(102, 126, 234, 0.4);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
 }
 
 .memory-item.matched {
-    background: linear-gradient(135deg, #4ade80 0%, #22c55e 100%);
-    color: white;
-    border-color: #16a34a;
+    background: #d4edda;
+    color: #155724;
+    border-color: #c3e6cb;
     cursor: default;
 }
 
 .memory-item.wrong {
-    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-    color: white;
-    border-color: #b91c1c;
+    background: #f8d7da;
+    color: #721c24;
+    border-color: #f5c6cb;
     animation: shake 0.5s;
 }
 
@@ -1582,21 +1606,61 @@ input:indeterminate + .slider:before {
 }
 
 .memory-sign {
-    font-size: 2rem;
+    font-size: 1.6rem;
     color: #333;
     line-height: 1;
+    letter-spacing: 0.05em;
 }
 
-.memory-sign.selected,
-.memory-sign.matched {
+.memory-sign .small-char {
+    font-size: 0.55em;
+    vertical-align: baseline;
+    position: relative;
+    top: -0.15em;
+    font-weight: 700;
+    opacity: 1;
+    display: inline-block;
+    background: rgba(0, 0, 0, 0.1);
+    padding: 0.05em 0.1em;
+    border-radius: 2px;
+    margin: 0 0.03em;
+}
+
+.memory-sign.selected .small-char,
+.memory-sign.matched .small-char {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.memory-sign.wrong .small-char {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.memory-sign.selected {
     color: white;
 }
 
+.memory-sign.matched {
+    color: #155724;
+}
+
 .memory-romaji {
-    font-size: 1.2rem;
+    font-size: 1rem;
     color: #333;
     text-transform: lowercase;
     line-height: 1;
+}
+
+.memory-romaji.selected {
+    color: white;
+}
+
+.memory-romaji.matched {
+    color: #155724;
+}
+
+.memory-romaji.wrong,
+.memory-sign.wrong {
+    color: #721c24;
 }
 
 .memory-romaji.selected,
@@ -1606,24 +1670,24 @@ input:indeterminate + .slider:before {
 
 .memory-complete {
     text-align: center;
-    padding: 25px;
+    padding: 30px;
     background: white;
-    border-radius: 12px;
-    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+    border-radius: 15px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     max-width: 400px;
-    margin: 20px auto;
+    margin: 30px auto;
     animation: fadeIn 0.5s ease-in;
 }
 
 .memory-complete h2 {
-    font-size: 1.8rem;
+    font-size: 2rem;
     margin-bottom: 15px;
     color: #333;
 }
 
 .memory-complete p {
-    font-size: 1rem;
-    margin-bottom: 15px;
+    font-size: 1.1rem;
+    margin-bottom: 20px;
     color: #666;
 }
 
@@ -1645,16 +1709,25 @@ input:indeterminate + .slider:before {
     }
     
     .memory-item {
-        height: 50px;
-        padding: 10px;
+        height: 45px;
+        padding: 8px;
     }
     
     .memory-sign {
-        font-size: 1.8rem;
+        font-size: 1.4rem;
     }
     
     .memory-romaji {
-        font-size: 1rem;
+        font-size: 0.9rem;
+    }
+    
+    .memory-column {
+        padding: 12px;
+    }
+    
+    .memory-column-title {
+        font-size: 0.9rem;
+        margin-bottom: 10px;
     }
     
     .memory-group-buttons {

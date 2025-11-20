@@ -90,13 +90,7 @@ function setupEventListeners() {
     
     // Memory game
     document.getElementById('back-to-menu-memory').addEventListener('click', showMenu);
-    document.getElementById('back-from-memory').addEventListener('click', () => {
-        if (memoryMode) {
-            showMemoryModeSelection(memoryType);
-        } else {
-            showMemoryGroupSelection();
-        }
-    });
+    document.getElementById('back-from-memory').addEventListener('click', showMemoryGroupSelection);
     document.getElementById('restart-memory').addEventListener('click', () => {
         if (memoryType && memoryMode) {
             startMemoryGame(memoryType, memoryMode);
@@ -739,7 +733,29 @@ function displayCard() {
     }
     
     const card = currentCards[currentCardIndex];
-    characterDisplay.textContent = card.char;
+    // Améliorer l'affichage des petits caractères pour les consonnes doublées
+    const char = card.char;
+    let formattedChar = '';
+    
+    // Parcourir chaque caractère et détecter les petits caractères
+    for (let i = 0; i < char.length; i++) {
+        const currentChar = char[i];
+        const charCode = currentChar.charCodeAt(0);
+        
+        // Détecter les petits caractères hiragana et katakana
+        // Petits hiragana: ぁ-ぉ, っ, ゃ-ょ (U+3041-U+3049, U+3063, U+3083-U+3087)
+        // Petits katakana: ァ-ォ, ッ, ャ-ョ (U+30A1-U+30A9, U+30C3, U+30E3-U+30E7)
+        const isSmallHiragana = (charCode >= 0x3041 && charCode <= 0x3049) || charCode === 0x3063 || (charCode >= 0x3083 && charCode <= 0x3087);
+        const isSmallKatakana = (charCode >= 0x30A1 && charCode <= 0x30A9) || charCode === 0x30C3 || (charCode >= 0x30E3 && charCode <= 0x30E7);
+        
+        if (isSmallHiragana || isSmallKatakana) {
+            formattedChar += `<span class="small-char">${currentChar}</span>`;
+        } else {
+            formattedChar += currentChar;
+        }
+    }
+    
+    characterDisplay.innerHTML = formattedChar;
     
     // Afficher les traductions si c'est un mot (pas un caractère seul)
     if (card.meaning) {
@@ -915,94 +931,31 @@ function showMemoryGroupSelection() {
     const buttonsContainer = document.getElementById('memory-group-buttons');
     buttonsContainer.innerHTML = '';
     
-    // Créer deux boutons : Hiragana et Katakana
-    const hiraganaButton = document.createElement('button');
-    hiraganaButton.className = 'memory-group-btn';
-    hiraganaButton.innerHTML = `
-        <div class="memory-group-icon">ひ</div>
-        <div class="memory-group-info">
-            <div class="memory-group-title">Hiragana</div>
-            <div class="memory-group-chars">Apprendre les caractères Hiragana</div>
-        </div>
-    `;
-    hiraganaButton.addEventListener('click', () => {
-        showMemoryModeSelection('hiragana');
-    });
-    buttonsContainer.appendChild(hiraganaButton);
+    // Créer 6 boutons : Hiragana/Katakana × Simples/Accents/Combinés
+    const modes = [
+        { type: 'hiragana', mode: 'simple', icon: 'ひ', title: 'Hiragana - Simples', desc: 'Basiques (あ-お, か-こ, etc.)' },
+        { type: 'hiragana', mode: 'accents', icon: 'ひ', title: 'Hiragana - Accents', desc: 'が-ご, ざ-ぞ, だ-ど, etc.' },
+        { type: 'hiragana', mode: 'composite', icon: 'ひ', title: 'Hiragana - Combinés', desc: 'きゃ-きょ, しゃ-しょ, etc.' },
+        { type: 'katakana', mode: 'simple', icon: 'カ', title: 'Katakana - Simples', desc: 'Basiques (ア-オ, カ-コ, etc.)' },
+        { type: 'katakana', mode: 'accents', icon: 'カ', title: 'Katakana - Accents', desc: 'ガ-ゴ, ザ-ゾ, ダ-ド, etc.' },
+        { type: 'katakana', mode: 'composite', icon: 'カ', title: 'Katakana - Combinés', desc: 'キャ-キョ, シャ-ショ, etc.' }
+    ];
     
-    const katakanaButton = document.createElement('button');
-    katakanaButton.className = 'memory-group-btn';
-    katakanaButton.innerHTML = `
-        <div class="memory-group-icon">カ</div>
-        <div class="memory-group-info">
-            <div class="memory-group-title">Katakana</div>
-            <div class="memory-group-chars">Apprendre les caractères Katakana</div>
-        </div>
-    `;
-    katakanaButton.addEventListener('click', () => {
-        showMemoryModeSelection('katakana');
+    modes.forEach(({ type, mode, icon, title, desc }) => {
+        const button = document.createElement('button');
+        button.className = 'memory-group-btn';
+        button.innerHTML = `
+            <div class="memory-group-icon">${icon}</div>
+            <div class="memory-group-info">
+                <div class="memory-group-title">${title}</div>
+                <div class="memory-group-chars">${desc}</div>
+            </div>
+        `;
+        button.addEventListener('click', () => {
+            startMemoryGame(type, mode);
+        });
+        buttonsContainer.appendChild(button);
     });
-    buttonsContainer.appendChild(katakanaButton);
-}
-
-function showMemoryModeSelection(type) {
-    memoryType = type;
-    
-    const buttonsContainer = document.getElementById('memory-group-buttons');
-    buttonsContainer.innerHTML = '';
-    
-    // Créer trois boutons : Simples, Accents, Combinés
-    const simpleButton = document.createElement('button');
-    simpleButton.className = 'memory-group-btn';
-    simpleButton.innerHTML = `
-        <div class="memory-group-icon">📝</div>
-        <div class="memory-group-info">
-            <div class="memory-group-title">Simples</div>
-            <div class="memory-group-chars">Basiques (あ-お, か-こ, etc.)</div>
-        </div>
-    `;
-    simpleButton.addEventListener('click', () => {
-        startMemoryGame(type, 'simple');
-    });
-    buttonsContainer.appendChild(simpleButton);
-    
-    const accentsButton = document.createElement('button');
-    accentsButton.className = 'memory-group-btn';
-    accentsButton.innerHTML = `
-        <div class="memory-group-icon">🔊</div>
-        <div class="memory-group-info">
-            <div class="memory-group-title">Avec accents</div>
-            <div class="memory-group-chars">が-ご, ざ-ぞ, だ-ど, etc.</div>
-        </div>
-    `;
-    accentsButton.addEventListener('click', () => {
-        startMemoryGame(type, 'accents');
-    });
-    buttonsContainer.appendChild(accentsButton);
-    
-    const compositeButton = document.createElement('button');
-    compositeButton.className = 'memory-group-btn';
-    compositeButton.innerHTML = `
-        <div class="memory-group-icon">🔗</div>
-        <div class="memory-group-info">
-            <div class="memory-group-title">Combinés</div>
-            <div class="memory-group-chars">きゃ-きょ, しゃ-しょ, etc.</div>
-        </div>
-    `;
-    compositeButton.addEventListener('click', () => {
-        startMemoryGame(type, 'composite');
-    });
-    buttonsContainer.appendChild(compositeButton);
-    
-    // Ajouter un bouton retour
-    const backButton = document.createElement('button');
-    backButton.className = 'btn btn-secondary';
-    backButton.style.marginTop = '20px';
-    backButton.innerHTML = '<span class="icon-back">←</span> Retour';
-    backButton.addEventListener('click', () => {
-        showMemoryGroupSelection();
-    });
-    buttonsContainer.appendChild(backButton);
 }
 
 function startMemoryGame(type, mode) {
@@ -1103,7 +1056,26 @@ function renderMemoryBoard(signs, romajis) {
         signElement.dataset.id = item.id;
         signElement.dataset.char = item.char;
         signElement.dataset.romaji = item.romaji;
-        signElement.textContent = item.char;
+        // Améliorer l'affichage des petits caractères
+        const char = item.char;
+        let formattedChar = '';
+        
+        for (let i = 0; i < char.length; i++) {
+            const currentChar = char[i];
+            const charCode = currentChar.charCodeAt(0);
+            
+            // Détecter les petits caractères
+            const isSmallHiragana = (charCode >= 0x3041 && charCode <= 0x3049) || charCode === 0x3063 || (charCode >= 0x3083 && charCode <= 0x3087);
+            const isSmallKatakana = (charCode >= 0x30A1 && charCode <= 0x30A9) || charCode === 0x30C3 || (charCode >= 0x30E3 && charCode <= 0x30E7);
+            
+            if (isSmallHiragana || isSmallKatakana) {
+                formattedChar += `<span class="small-char">${currentChar}</span>`;
+            } else {
+                formattedChar += currentChar;
+            }
+        }
+        
+        signElement.innerHTML = formattedChar;
         
         // Vérifier si cette paire est déjà trouvée
         if (matchedPairs.some(p => p.id === item.id)) {
