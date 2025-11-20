@@ -7,6 +7,17 @@ let totalAnswered = 0;
 let selectedGroups = [];
 let selectionState = {}; // Sauvegarde de l'état de sélection des groupes et caractères
 
+// État du jeu memory
+let memoryType = null; // 'hiragana' ou 'katakana'
+let memoryMode = null; // 'simple', 'accents', 'composite'
+let allCharacters = []; // Tous les caractères disponibles
+let currentSeries = []; // Série actuelle de 5 caractères
+let selectedSign = null;
+let selectedRomaji = null;
+let matchedPairs = [];
+let memoryAttempts = 0;
+let wrongMatch = false;
+
 // Éléments DOM
 const menu = document.getElementById('menu');
 const groupSelection = document.getElementById('group-selection');
@@ -22,6 +33,9 @@ const translationDisplay = document.getElementById('translation-display');
 const progressFill = document.getElementById('progress');
 const scoreDisplay = document.getElementById('score');
 const totalDisplay = document.getElementById('total');
+const memoryGroupSelection = document.getElementById('memory-group-selection');
+const memoryGame = document.getElementById('memory-game');
+const memoryBoard = document.getElementById('memory-board');
 
 // Initialisation
 document.addEventListener('DOMContentLoaded', () => {
@@ -74,6 +88,25 @@ function setupEventListeners() {
     document.getElementById('restart-from-results').addEventListener('click', restartTest);
     document.getElementById('back-to-menu-results').addEventListener('click', showMenu);
     
+    // Memory game
+    document.getElementById('back-to-menu-memory').addEventListener('click', showMenu);
+    document.getElementById('back-from-memory').addEventListener('click', () => {
+        if (memoryMode) {
+            showMemoryModeSelection(memoryType);
+        } else {
+            showMemoryGroupSelection();
+        }
+    });
+    document.getElementById('restart-memory').addEventListener('click', () => {
+        if (memoryType && memoryMode) {
+            startMemoryGame(memoryType, memoryMode);
+        }
+    });
+    document.getElementById('next-series').addEventListener('click', () => {
+        document.getElementById('memory-complete').classList.add('hidden');
+        startNewSeries();
+    });
+    document.getElementById('back-to-menu-memory-complete').addEventListener('click', showMenu);
 
     // Enter key support
     answerInput.addEventListener('keypress', (e) => {
@@ -90,7 +123,9 @@ function setupEventListeners() {
 function handleModeSelection(mode) {
     currentMode = mode;
     
-    if (mode.includes('chars')) {
+    if (mode === 'memory-easy') {
+        showMemoryGroupSelection();
+    } else if (mode.includes('chars')) {
         showGroupSelection(mode);
     } else {
         showLevelSelection(mode);
@@ -861,6 +896,8 @@ function showMenu() {
     levelSelection.classList.add('hidden');
     testArea.classList.add('hidden');
     results.classList.add('hidden');
+    memoryGroupSelection.classList.add('hidden');
+    memoryGame.classList.add('hidden');
     menu.classList.remove('hidden');
     
     currentMode = null;
@@ -869,6 +906,360 @@ function showMenu() {
     score = 0;
     totalAnswered = 0;
 }
+
+// Fonctions pour le jeu de memory
+function showMemoryGroupSelection() {
+    menu.classList.add('hidden');
+    memoryGroupSelection.classList.remove('hidden');
+    
+    const buttonsContainer = document.getElementById('memory-group-buttons');
+    buttonsContainer.innerHTML = '';
+    
+    // Créer deux boutons : Hiragana et Katakana
+    const hiraganaButton = document.createElement('button');
+    hiraganaButton.className = 'memory-group-btn';
+    hiraganaButton.innerHTML = `
+        <div class="memory-group-icon">ひ</div>
+        <div class="memory-group-info">
+            <div class="memory-group-title">Hiragana</div>
+            <div class="memory-group-chars">Apprendre les caractères Hiragana</div>
+        </div>
+    `;
+    hiraganaButton.addEventListener('click', () => {
+        showMemoryModeSelection('hiragana');
+    });
+    buttonsContainer.appendChild(hiraganaButton);
+    
+    const katakanaButton = document.createElement('button');
+    katakanaButton.className = 'memory-group-btn';
+    katakanaButton.innerHTML = `
+        <div class="memory-group-icon">カ</div>
+        <div class="memory-group-info">
+            <div class="memory-group-title">Katakana</div>
+            <div class="memory-group-chars">Apprendre les caractères Katakana</div>
+        </div>
+    `;
+    katakanaButton.addEventListener('click', () => {
+        showMemoryModeSelection('katakana');
+    });
+    buttonsContainer.appendChild(katakanaButton);
+}
+
+function showMemoryModeSelection(type) {
+    memoryType = type;
+    
+    const buttonsContainer = document.getElementById('memory-group-buttons');
+    buttonsContainer.innerHTML = '';
+    
+    // Créer trois boutons : Simples, Accents, Combinés
+    const simpleButton = document.createElement('button');
+    simpleButton.className = 'memory-group-btn';
+    simpleButton.innerHTML = `
+        <div class="memory-group-icon">📝</div>
+        <div class="memory-group-info">
+            <div class="memory-group-title">Simples</div>
+            <div class="memory-group-chars">Basiques (あ-お, か-こ, etc.)</div>
+        </div>
+    `;
+    simpleButton.addEventListener('click', () => {
+        startMemoryGame(type, 'simple');
+    });
+    buttonsContainer.appendChild(simpleButton);
+    
+    const accentsButton = document.createElement('button');
+    accentsButton.className = 'memory-group-btn';
+    accentsButton.innerHTML = `
+        <div class="memory-group-icon">🔊</div>
+        <div class="memory-group-info">
+            <div class="memory-group-title">Avec accents</div>
+            <div class="memory-group-chars">が-ご, ざ-ぞ, だ-ど, etc.</div>
+        </div>
+    `;
+    accentsButton.addEventListener('click', () => {
+        startMemoryGame(type, 'accents');
+    });
+    buttonsContainer.appendChild(accentsButton);
+    
+    const compositeButton = document.createElement('button');
+    compositeButton.className = 'memory-group-btn';
+    compositeButton.innerHTML = `
+        <div class="memory-group-icon">🔗</div>
+        <div class="memory-group-info">
+            <div class="memory-group-title">Combinés</div>
+            <div class="memory-group-chars">きゃ-きょ, しゃ-しょ, etc.</div>
+        </div>
+    `;
+    compositeButton.addEventListener('click', () => {
+        startMemoryGame(type, 'composite');
+    });
+    buttonsContainer.appendChild(compositeButton);
+    
+    // Ajouter un bouton retour
+    const backButton = document.createElement('button');
+    backButton.className = 'btn btn-secondary';
+    backButton.style.marginTop = '20px';
+    backButton.innerHTML = '<span class="icon-back">←</span> Retour';
+    backButton.addEventListener('click', () => {
+        showMemoryGroupSelection();
+    });
+    buttonsContainer.appendChild(backButton);
+}
+
+function startMemoryGame(type, mode) {
+    memoryType = type;
+    memoryMode = mode;
+    memoryGroupSelection.classList.add('hidden');
+    memoryGame.classList.remove('hidden');
+    
+    // Définir les groupes selon le mode
+    const groupsByMode = {
+        simple: ['basic', 'k', 's', 't', 'n', 'h', 'm', 'y', 'r', 'w'],
+        accents: ['g', 'z', 'd', 'b', 'p'],
+        composite: ['kya', 'sha', 'cha', 'nya', 'hya', 'mya', 'rya', 'gya', 'ja', 'bya', 'pya']
+    };
+    
+    // Collecter les caractères du mode choisi
+    const data = type === 'hiragana' ? hiraganaData : katakanaData;
+    allCharacters = [];
+    const groups = groupsByMode[mode];
+    
+    groups.forEach(groupKey => {
+        if (data[groupKey]) {
+            data[groupKey].forEach(char => {
+                allCharacters.push({
+                    char: char.char,
+                    romaji: char.romaji,
+                    id: `pair-${char.char}-${char.romaji}`
+                });
+            });
+        }
+    });
+    
+    // Mélanger tous les caractères
+    shuffleArray(allCharacters);
+    
+    // Démarrer la première série
+    startNewSeries();
+}
+
+function startNewSeries() {
+    // Prendre 5 caractères aléatoires
+    if (allCharacters.length < 5) {
+        // Si on n'a plus assez de caractères, remélanger tous les caractères
+        const data = memoryType === 'hiragana' ? hiraganaData : katakanaData;
+        allCharacters = [];
+        Object.keys(data).forEach(groupKey => {
+            data[groupKey].forEach(char => {
+                allCharacters.push({
+                    char: char.char,
+                    romaji: char.romaji,
+                    id: `pair-${char.char}-${char.romaji}`
+                });
+            });
+        });
+        shuffleArray(allCharacters);
+    }
+    
+    currentSeries = allCharacters.splice(0, 5);
+    
+    // Mélanger les deux listes séparément
+    const signs = [...currentSeries].map(c => ({ ...c, type: 'sign' }));
+    const romajis = [...currentSeries].map(c => ({ ...c, type: 'romaji' }));
+    shuffleArray(signs);
+    shuffleArray(romajis);
+    
+    // Réinitialiser l'état
+    selectedSign = null;
+    selectedRomaji = null;
+    matchedPairs = [];
+    memoryAttempts = 0;
+    wrongMatch = false;
+    
+    renderMemoryBoard(signs, romajis);
+    updateMemoryStats();
+}
+
+function renderMemoryBoard(signs, romajis) {
+    memoryBoard.innerHTML = '';
+    
+    // Créer le conteneur pour les deux colonnes
+    const container = document.createElement('div');
+    container.className = 'memory-match-container';
+    
+    // Colonne gauche : signes
+    const signsColumn = document.createElement('div');
+    signsColumn.className = 'memory-column memory-signs-column';
+    const signsTitle = document.createElement('h3');
+    signsTitle.textContent = 'Signes';
+    signsTitle.className = 'memory-column-title';
+    signsColumn.appendChild(signsTitle);
+    
+    const signsList = document.createElement('div');
+    signsList.className = 'memory-list';
+    
+    signs.forEach((item, index) => {
+        const signElement = document.createElement('div');
+        signElement.className = 'memory-item memory-sign';
+        signElement.dataset.id = item.id;
+        signElement.dataset.char = item.char;
+        signElement.dataset.romaji = item.romaji;
+        signElement.textContent = item.char;
+        
+        // Vérifier si cette paire est déjà trouvée
+        if (matchedPairs.some(p => p.id === item.id)) {
+            signElement.classList.add('matched');
+            signElement.style.opacity = '0.5';
+            signElement.style.cursor = 'default';
+        } else {
+            signElement.addEventListener('click', () => {
+                selectSign(signElement, item);
+            });
+        }
+        
+        signsList.appendChild(signElement);
+    });
+    
+    signsColumn.appendChild(signsList);
+    container.appendChild(signsColumn);
+    
+    // Colonne droite : romajis
+    const romajisColumn = document.createElement('div');
+    romajisColumn.className = 'memory-column memory-romajis-column';
+    const romajisTitle = document.createElement('h3');
+    romajisTitle.textContent = 'Romajis';
+    romajisTitle.className = 'memory-column-title';
+    romajisColumn.appendChild(romajisTitle);
+    
+    const romajisList = document.createElement('div');
+    romajisList.className = 'memory-list';
+    
+    romajis.forEach((item, index) => {
+        const romajiElement = document.createElement('div');
+        romajiElement.className = 'memory-item memory-romaji';
+        romajiElement.dataset.id = item.id;
+        romajiElement.dataset.char = item.char;
+        romajiElement.dataset.romaji = item.romaji;
+        romajiElement.textContent = item.romaji;
+        
+        // Vérifier si cette paire est déjà trouvée
+        if (matchedPairs.some(p => p.id === item.id)) {
+            romajiElement.classList.add('matched');
+            romajiElement.style.opacity = '0.5';
+            romajiElement.style.cursor = 'default';
+        } else {
+            romajiElement.addEventListener('click', () => {
+                selectRomaji(romajiElement, item);
+            });
+        }
+        
+        romajisList.appendChild(romajiElement);
+    });
+    
+    romajisColumn.appendChild(romajisList);
+    container.appendChild(romajisColumn);
+    
+    memoryBoard.appendChild(container);
+}
+
+function selectSign(element, item) {
+    // Désélectionner l'ancien signe si présent
+    if (selectedSign) {
+        selectedSign.element.classList.remove('selected');
+    }
+    
+    selectedSign = { element, item };
+    element.classList.add('selected');
+    
+    // Si un romaji est déjà sélectionné, vérifier la correspondance
+    if (selectedRomaji) {
+        checkMatch();
+    }
+}
+
+function selectRomaji(element, item) {
+    // Désélectionner l'ancien romaji si présent
+    if (selectedRomaji) {
+        selectedRomaji.element.classList.remove('selected');
+    }
+    
+    selectedRomaji = { element, item };
+    element.classList.add('selected');
+    
+    // Si un signe est déjà sélectionné, vérifier la correspondance
+    if (selectedSign) {
+        checkMatch();
+    }
+}
+
+function checkMatch() {
+    if (!selectedSign || !selectedRomaji) return;
+    
+    memoryAttempts++;
+    
+    // Vérifier si c'est une paire correcte
+    if (selectedSign.item.id === selectedRomaji.item.id) {
+        // Paire trouvée !
+        selectedSign.element.classList.add('matched');
+        selectedSign.element.classList.remove('selected', 'wrong');
+        selectedRomaji.element.classList.add('matched');
+        selectedRomaji.element.classList.remove('selected', 'wrong');
+        
+        selectedSign.element.style.opacity = '0.5';
+        selectedSign.element.style.cursor = 'default';
+        selectedRomaji.element.style.opacity = '0.5';
+        selectedRomaji.element.style.cursor = 'default';
+        
+        // Désactiver les clics
+        selectedSign.element.replaceWith(selectedSign.element.cloneNode(true));
+        selectedRomaji.element.replaceWith(selectedRomaji.element.cloneNode(true));
+        
+        matchedPairs.push(selectedSign.item);
+        
+        if (matchedPairs.length === 5) {
+            // Série terminée
+            setTimeout(() => {
+                showSeriesComplete();
+            }, 500);
+        }
+    } else {
+        // Pas de paire, afficher l'erreur en rouge
+        wrongMatch = true;
+        selectedSign.element.classList.add('wrong');
+        selectedRomaji.element.classList.add('wrong');
+        
+        // Sauvegarder les références avant de les réinitialiser
+        const signElement = selectedSign.element;
+        const romajiElement = selectedRomaji.element;
+        
+        // Réinitialiser les sélections immédiatement
+        selectedSign = null;
+        selectedRomaji = null;
+        
+        setTimeout(() => {
+            signElement.classList.remove('selected', 'wrong');
+            romajiElement.classList.remove('selected', 'wrong');
+            wrongMatch = false;
+        }, 1000);
+    }
+    
+    if (!wrongMatch) {
+        selectedSign = null;
+        selectedRomaji = null;
+    }
+    updateMemoryStats();
+}
+
+function showSeriesComplete() {
+    document.getElementById('memory-complete').classList.remove('hidden');
+    document.getElementById('memory-final-attempts').textContent = memoryAttempts;
+}
+
+function updateMemoryStats() {
+    document.getElementById('memory-pairs-found').textContent = matchedPairs.length;
+    document.getElementById('memory-total-pairs').textContent = 5;
+    document.getElementById('memory-attempts').textContent = memoryAttempts;
+}
+
 
 function shuffleArray(array) {
     for (let i = array.length - 1; i > 0; i--) {

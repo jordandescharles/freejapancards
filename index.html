@@ -43,6 +43,11 @@
                     <h2>Katakana Words</h2>
                     <p>Pratiquez vos connaissances des mots Katakana</p>
                 </div>
+                <div class="menu-card" data-mode="memory-easy">
+                    <div class="card-icon">🎯</div>
+                    <h2>Apprendre facilement</h2>
+                    <p>Jeu de memory par groupes de 5 caractères</p>
+                </div>
             </div>
         </div>
 
@@ -130,6 +135,47 @@
                     <button id="restart-test" class="btn btn-secondary" title="Recommencer">
                         <span class="icon-restart">↻</span>
                     </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sélection de groupe pour le memory -->
+        <div id="memory-group-selection" class="memory-group-selection hidden">
+            <div class="memory-group-selection-header">
+                <button id="back-to-menu-memory" class="btn btn-secondary btn-icon" title="Retour au menu">
+                    <span class="icon-back">←</span>
+                </button>
+                <h2 id="memory-selection-title">Choisissez le type de caractères</h2>
+            </div>
+            <div id="memory-group-buttons" class="memory-group-buttons"></div>
+        </div>
+
+        <!-- Zone de jeu memory -->
+        <div id="memory-game" class="memory-game hidden">
+            <div class="memory-header">
+                <button id="back-from-memory" class="btn btn-secondary btn-icon" title="Retour">
+                    <span class="icon-back">←</span>
+                </button>
+                <div class="memory-stats">
+                    <span>Paires trouvées: <strong id="memory-pairs-found">0</strong> / <strong id="memory-total-pairs">5</strong></span>
+                    <span>Essais: <strong id="memory-attempts">0</strong></span>
+                </div>
+                <button id="restart-memory" class="btn btn-secondary" title="Recommencer">
+                    <span class="icon-restart">↻</span>
+                </button>
+            </div>
+            <div id="memory-board" class="memory-board">
+                <!-- Les listes seront générées dynamiquement -->
+            </div>
+            <div id="memory-complete" class="memory-complete hidden">
+                <h2>🎉 Série terminée !</h2>
+                <p>Vous avez complété cette série !</p>
+                <div class="memory-final-stats">
+                    <p>Essais: <strong id="memory-final-attempts">0</strong></p>
+                </div>
+                <div class="button-group">
+                    <button id="next-series" class="btn btn-primary">Série suivante</button>
+                    <button id="back-to-menu-memory-complete" class="btn btn-secondary">Retour au menu</button>
                 </div>
             </div>
         </div>
