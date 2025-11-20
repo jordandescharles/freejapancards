@@ -933,24 +933,18 @@ function showMemoryGroupSelection() {
     
     // Créer 6 boutons : Hiragana/Katakana × Simples/Accents/Combinés
     const modes = [
-        { type: 'hiragana', mode: 'simple', icon: 'ひ', title: 'Hiragana - Simples', desc: 'Basiques (あ-お, か-こ, etc.)' },
-        { type: 'hiragana', mode: 'accents', icon: 'ひ', title: 'Hiragana - Accents', desc: 'が-ご, ざ-ぞ, だ-ど, etc.' },
-        { type: 'hiragana', mode: 'composite', icon: 'ひ', title: 'Hiragana - Combinés', desc: 'きゃ-きょ, しゃ-しょ, etc.' },
-        { type: 'katakana', mode: 'simple', icon: 'カ', title: 'Katakana - Simples', desc: 'Basiques (ア-オ, カ-コ, etc.)' },
-        { type: 'katakana', mode: 'accents', icon: 'カ', title: 'Katakana - Accents', desc: 'ガ-ゴ, ザ-ゾ, ダ-ド, etc.' },
-        { type: 'katakana', mode: 'composite', icon: 'カ', title: 'Katakana - Combinés', desc: 'キャ-キョ, シャ-ショ, etc.' }
+        { type: 'hiragana', mode: 'simple', label: 'ひ Simples' },
+        { type: 'hiragana', mode: 'accents', label: 'ひ Accents' },
+        { type: 'hiragana', mode: 'composite', label: 'ひ Combinés' },
+        { type: 'katakana', mode: 'simple', label: 'カ Simples' },
+        { type: 'katakana', mode: 'accents', label: 'カ Accents' },
+        { type: 'katakana', mode: 'composite', label: 'カ Combinés' }
     ];
     
-    modes.forEach(({ type, mode, icon, title, desc }) => {
+    modes.forEach(({ type, mode, label }) => {
         const button = document.createElement('button');
-        button.className = 'memory-group-btn';
-        button.innerHTML = `
-            <div class="memory-group-icon">${icon}</div>
-            <div class="memory-group-info">
-                <div class="memory-group-title">${title}</div>
-                <div class="memory-group-chars">${desc}</div>
-            </div>
-        `;
+        button.className = 'memory-mode-btn';
+        button.textContent = label;
         button.addEventListener('click', () => {
             startMemoryGame(type, mode);
         });
