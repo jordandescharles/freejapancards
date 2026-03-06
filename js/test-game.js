@@ -70,7 +70,7 @@ const TestGame = {
         
         if (normalizedUser === normalizedCorrect) {
             AppState.score++;
-            let message = `Correct! ${card.char} = ${card.romaji}`;
+            let message = `Correct! ${formatSmallChars(card.char)} = ${card.romaji}`;
             if (card.meaning) {
                 message += `\n🇫🇷 ${card.meaning}`;
                 if (card.english) {
@@ -81,7 +81,7 @@ const TestGame = {
             if (!card.meaning && card.char) {
                 const exampleWord = TestGame.findRandomWordWithCharacter(card.char);
                 if (exampleWord) {
-                    message += `\n\n💡 Exemple: ${exampleWord.word} (${exampleWord.romaji})`;
+                    message += `\n\n💡 Exemple: ${formatSmallChars(exampleWord.word)} (${exampleWord.romaji})`;
                     if (exampleWord.meaning) {
                         message += ` - 🇫🇷 ${exampleWord.meaning}`;
                         if (exampleWord.english) {
@@ -93,7 +93,7 @@ const TestGame = {
             
             TestGame.showFeedback(true, message);
         } else {
-            let message = `Incorrect. La bonne réponse est: ${card.romaji}`;
+            let message = `Incorrect. La bonne réponse est: ${formatSmallChars(card.char)} = ${card.romaji}`;
             if (card.meaning) {
                 message += `\n🇫🇷 ${card.meaning}`;
                 if (card.english) {

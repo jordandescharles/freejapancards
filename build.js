@@ -44,6 +44,7 @@ const state = fs.readFileSync('js/state.js', 'utf8');
 const testGame = fs.readFileSync('js/test-game.js', 'utf8');
 const memoryGame = fs.readFileSync('js/memory-game.js', 'utf8');
 const ui = fs.readFileSync('js/ui.js', 'utf8');
+const srs = fs.readFileSync('js/srs.js', 'utf8');
 const script = fs.readFileSync('script.js', 'utf8');
 
 // Minifier
@@ -55,6 +56,7 @@ const minifiedState = minifyJS(state);
 const minifiedTestGame = minifyJS(testGame);
 const minifiedMemoryGame = minifyJS(memoryGame);
 const minifiedUI = minifyJS(ui);
+const minifiedSrs = minifyJS(srs);
 const minifiedScript = minifyJS(script);
 
 // Combiner les JS en un seul bundle dans l'ordre
@@ -65,11 +67,12 @@ const bundledJS = minifiedData + '\n' +
                   minifiedTestGame + '\n' + 
                   minifiedMemoryGame + '\n' + 
                   minifiedUI + '\n' + 
+                  minifiedSrs + '\n' + 
                   minifiedScript;
 
 // Créer le HTML avec CSS inline et JS bundle
 // Pattern pour matcher tous les scripts (data.js, js/*.js, script.js)
-const scriptPattern = /<script src="data\.js"><\/script>\s*<script src="js\/utils\.js"><\/script>\s*<script src="js\/dom\.js"><\/script>\s*<script src="js\/state\.js"><\/script>\s*<script src="js\/test-game\.js"><\/script>\s*<script src="js\/memory-game\.js"><\/script>\s*<script src="js\/ui\.js"><\/script>\s*<script src="script\.js"><\/script>/;
+const scriptPattern = /<script src="data\.js"><\/script>\s*<script src="js\/utils\.js"><\/script>\s*<script src="js\/dom\.js"><\/script>\s*<script src="js\/state\.js"><\/script>\s*<script src="js\/test-game\.js"><\/script>\s*<script src="js\/memory-game\.js"><\/script>\s*<script src="js\/ui\.js"><\/script>\s*<script src="js\/srs\.js"><\/script>\s*<script src="script\.js"><\/script>/;
 const newHTML = html
     .replace(/<link rel="stylesheet" href="styles\.css">/, `<style>${minifiedCSS}</style>`)
     .replace(scriptPattern, `<script>${bundledJS}</script>`);
@@ -121,7 +124,8 @@ const originalSize = fs.statSync('index.html').size +
                      fs.statSync('js/state.js').size +
                      fs.statSync('js/test-game.js').size +
                      fs.statSync('js/memory-game.js').size +
-                     fs.statSync('js/ui.js').size;
+                     fs.statSync('js/ui.js').size +
+                     fs.statSync('js/srs.js').size;
 const newSize = fs.statSync('dist/index.html').size;
 const reduction = ((1 - newSize / originalSize) * 100).toFixed(1);
 
