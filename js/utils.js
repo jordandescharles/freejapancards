@@ -43,3 +43,24 @@ function updateCurrentYear() {
     }
 }
 
+function initTheme() {
+    const theme = localStorage.getItem('theme');
+    const toggle = document.getElementById('theme-dark-toggle');
+    if (theme === 'dark' && toggle) {
+        document.body.classList.add('dark-mode');
+        toggle.checked = true;
+    } else if (toggle) {
+        document.body.classList.remove('dark-mode');
+        toggle.checked = false;
+    }
+}
+
+function setTheme(dark) {
+    if (dark) {
+        document.body.classList.add('dark-mode');
+        localStorage.setItem('theme', 'dark');
+    } else {
+        document.body.classList.remove('dark-mode');
+        localStorage.setItem('theme', 'light');
+    }
+}

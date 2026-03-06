@@ -2,6 +2,7 @@
 
 // Initialisation
 document.addEventListener('DOMContentLoaded', () => {
+    initTheme();
     setupEventListeners();
     updateCurrentYear();
 });
@@ -93,4 +94,12 @@ function setupEventListeners() {
             }
         }
     });
+
+    // Theme switcher (mode sombre)
+    const themeToggle = document.getElementById('theme-dark-toggle');
+    if (themeToggle) {
+        themeToggle.addEventListener('change', () => {
+            setTheme(themeToggle.checked);
+        });
+    }
 }
