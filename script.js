@@ -57,6 +57,32 @@ function setupEventListeners() {
     });
     document.getElementById('back-to-menu-memory-complete').addEventListener('click', UI.showMenu);
 
+    // SRS - Révision espacée
+    document.getElementById('srs-start-review').addEventListener('click', () => {
+        document.getElementById('srs-dashboard').classList.add('hidden');
+        document.getElementById('srs-review').classList.remove('hidden');
+        SRS.startSession();
+    });
+    document.getElementById('srs-back-to-menu').addEventListener('click', UI.showMenu);
+    document.getElementById('srs-review-back').addEventListener('click', () => {
+        document.getElementById('srs-review').classList.add('hidden');
+        UI.showSrsDashboard();
+    });
+    document.getElementById('srs-check-answer').addEventListener('click', SRS.checkAndShowFeedback);
+    document.getElementById('srs-rate-again').addEventListener('click', () => SRS.rateAndNext('again'));
+    document.getElementById('srs-rate-good').addEventListener('click', () => SRS.rateAndNext('good'));
+    document.getElementById('srs-rate-easy').addEventListener('click', () => SRS.rateAndNext('easy'));
+    document.getElementById('srs-done-back').addEventListener('click', UI.showMenu);
+    document.getElementById('srs-answer-input').addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            if (document.getElementById('srs-rate-buttons').classList.contains('hidden')) {
+                SRS.checkAndShowFeedback();
+            } else {
+                SRS.rateAndNext('good');
+            }
+        }
+    });
+
     // Enter key support
     DOM.answerInput.addEventListener('keypress', (e) => {
         if (e.key === 'Enter') {

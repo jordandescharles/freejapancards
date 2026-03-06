@@ -5,6 +5,8 @@ const UI = {
         
         if (mode === 'memory-easy') {
             MemoryGame.showGroupSelection();
+        } else if (mode === 'srs') {
+            UI.showSrsDashboard();
         } else if (mode.includes('chars')) {
             UI.showGroupSelection(mode);
         } else {
@@ -208,7 +210,7 @@ const UI = {
                 
                 const charSpan = document.createElement('div');
                 charSpan.className = 'character-char';
-                charSpan.textContent = char.char;
+                charSpan.innerHTML = formatSmallChars(char.char);
                 
                 const romajiSpan = document.createElement('div');
                 romajiSpan.className = 'character-romaji';
@@ -495,6 +497,10 @@ const UI = {
         DOM.results.classList.add('hidden');
         DOM.memoryGroupSelection.classList.add('hidden');
         DOM.memoryGame.classList.add('hidden');
+        const srsDashboard = document.getElementById('srs-dashboard');
+        const srsReview = document.getElementById('srs-review');
+        if (srsDashboard) srsDashboard.classList.add('hidden');
+        if (srsReview) srsReview.classList.add('hidden');
         DOM.menu.classList.remove('hidden');
         
         AppState.currentMode = null;
@@ -502,6 +508,16 @@ const UI = {
         AppState.currentCardIndex = 0;
         AppState.score = 0;
         AppState.totalAnswered = 0;
+    },
+
+    showSrsDashboard() {
+        DOM.menu.classList.add('hidden');
+        const dashboard = document.getElementById('srs-dashboard');
+        const review = document.getElementById('srs-review');
+        if (dashboard) dashboard.classList.remove('hidden');
+        if (review) review.classList.add('hidden');
+        const countEl = document.getElementById('srs-due-count');
+        if (countEl) countEl.textContent = SRS.getDueCount();
     }
 };
 
